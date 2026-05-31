@@ -6,13 +6,15 @@
 # config.json IS committed (required by the launchers; shared value works on both machines
 # when brain.executorHost = the box's LAN IP). config.example.json stays as a template.
 
-# E3Next/MacroQuest distribution (binaries + vendor config) — large third-party, NOT tracked.
-# Policy: the stock install stays out of git; the assets WE author/update are tracked in their own
-# repo folders and deployed into the install:
-#   - our MQ Lua  -> /mqbridge/*.lua   (tracked)   deploy with scripts/deploy-lua.ps1
-#   - our e3 INIs -> /e3/*             (tracked, when we create them)
-# To force-track a specific vendor file we customize: `git add -f <path>`.
-/tools/E3Next/
+# E3Next/MacroQuest install (we run MQ from here on both machines).
+# Ignore the binaries/vendor runtime, but TRACK the e3 config INIs (per-character client configs +
+# shared macro settings) so they're maintained here and synced over git.
+# NOTE: MQ rewrites these INIs at runtime — treat git as the canonical store: edit -> push -> pull +
+# reload; capture in-game tweaks by committing them on the machine that made them. Binaries are NOT
+# synced — each machine keeps its own copy of the install; only config/ travels over git.
+# Our MQ Lua source of truth stays in /mqbridge/*.lua (deploy into the install with deploy-lua.ps1).
+/tools/E3Next/*
+!/tools/E3Next/config/
 
 # Node
 node_modules/
