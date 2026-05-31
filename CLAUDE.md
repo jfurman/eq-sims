@@ -124,7 +124,8 @@ auto-equip on drop; guild-chat narration. (Design doc Section 5.)
 - **Manual (you):** per-class e3next combat config (tune in-game / e3 inis); granting the scoped
   `#zone` account status; the clients themselves (already running).
 - **Out of scope until later:** full Quartermaster, 5 parallel expeditions, raid (Mode C) assembly,
-  LLM personality/banter, optional realism-mode overland travel.
+  LLM personality/banter, optional realism-mode overland travel; the **guild gear economy + per-Lt
+  crafting** (design §5.1 / Phase 4) — design the contract & DB reader with it in mind, build later.
 
 ---
 

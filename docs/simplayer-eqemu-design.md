@@ -128,6 +128,39 @@ to **5 parallel expeditions**.
 **Division of labor:** LLM/agent does POLL/SCORE/SOURCE/PRIORITIZE/DISPATCH + chat (low-frequency).
 Bot AI + macros do FARM/EQUIP. **LLM off the hot path.**
 
+### 5.1 Gear economy: per-team ownership, surplus trickle-up, and crafting
+The Quartermaster runs a guild-wide gear **economy** with two supply pipelines the GL arbitrates between.
+
+**Ownership & loot trickle-up.**
+- Each **Lieutenant gears its own team** of 5 bots first: drops a Lt's squad earns are equipped by that
+  squad when they're an upgrade (the §5 FARM/EQUIP step, scoped to the owning team).
+- **Surplus** — items no one on that Lt's team needs — flows **up to the Guild Leader's bot pool** (the
+  ~41 raid-filler bots). Nothing is wasted; the GL pool is outfitted from guild-wide overflow.
+
+**GL as logistics brain.** The GL (Quartermaster) determines, **per Lieutenant, which of their bots
+needs gear**, then **plans and orchestrates the missions** to obtain it — the §5 dispatch loop, now
+explicitly per-Lt-team, with GL-owned prioritization across the 5 squads.
+
+**Crafting specialization — the second gear source.**
+- Each **Lieutenant specializes in one tradeskill** (blacksmithing / tailoring / jewelcraft / alchemy /
+  pottery / fletching / …), chosen to cover the guild's needs.
+- **When not on a farming mission, a Lt trains its skill**, gathering the crafting materials needed to
+  raise it (material runs are themselves Quartermaster missions). Idle Lieutenants are never idle:
+  farming, training a craft, or gathering mats.
+- Crafted output makes each Lt a **supply node**: the GL can **source gear by crafting** (commission a
+  Lt to make an item) as an alternative/complement to farming a drop.
+
+**Net:** for any gear gap the GL chooses **farm a drop** (§5) vs **craft it** (5.1) by ROI — drop
+rate / camp time vs. skill level / material cost. The item→source DB chain (§5 step 3) gains a parallel
+**item → recipe → components → where components drop/sell** chain for the craft path.
+
+**Open questions / design notes (post-Quartermaster-v1):**
+- Which tradeskill each Lt specializes in (map to the 5 classes / guild needs).
+- Trading mechanics for surplus bot→GL and mats→crafter — prefer in-game give/trade per hard rule #7
+  over direct DB inventory writes.
+- Skill-up curve + material thresholds; a give-up/retry policy like the farm policy.
+- Design the intent contract + DB reader now so this layer slots in later (don't build it yet).
+
 ---
 
 ## 6. Gear scoring model
@@ -169,6 +202,12 @@ upgrade; auto-equip; guild-chat narration.
 ### Phase 3 — scale to 6 + agent brain
 Add Lieutenants to the full balanced five; LLM quartermaster reasoning + guild-chat personality;
 5 parallel expeditions; raid assembly (Mode C) with GL filler.
+
+### Phase 4 — guild gear economy + crafting (§5.1)
+Per-Lt-team gear ownership with surplus trickle-up to the GL pool; GL plans per-bot gear needs and
+orchestrates missions across squads. Each Lt specializes in one tradeskill, trains it and gathers mats
+when idle, and becomes a crafting supply node. GL arbitrates farm-vs-craft by ROI; add the
+item→recipe→components DB chain alongside item→source.
 
 ---
 
