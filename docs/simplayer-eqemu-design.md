@@ -131,11 +131,17 @@ Bot AI + macros do FARM/EQUIP. **LLM off the hot path.**
 ### 5.1 Gear economy: per-team ownership, surplus trickle-up, and crafting
 The Quartermaster runs a guild-wide gear **economy** with two supply pipelines the GL arbitrates between.
 
-**Ownership & loot trickle-up.**
+**Ownership & loot trickle-up.** A cascade — equip where it helps most, store the rest centrally.
 - Each **Lieutenant gears its own team** of 5 bots first: drops a Lt's squad earns are equipped by that
   squad when they're an upgrade (the §5 FARM/EQUIP step, scoped to the owning team).
 - **Surplus** — items no one on that Lt's team needs — flows **up to the Guild Leader's bot pool** (the
   ~41 raid-filler bots). Nothing is wasted; the GL pool is outfitted from guild-wide overflow.
+- **No immediate use anywhere** → deposit to the **guild bank**, the central reserve the GL draws from
+  later (future upgrades, crafting components, distribution). **Contingent on GL access:** this only
+  works if the GL (and thus the agent acting through it) can deposit/withdraw — EQEmu guild-bank
+  permissions are rank-gated. **Verify GL guild-bank withdraw access**; if absent, raise the GL's guild
+  rank or fall back to a GL mule/bot as the store. The DB reader treats the guild bank as a readable
+  inventory location.
 
 **GL as logistics brain.** The GL (Quartermaster) determines, **per Lieutenant, which of their bots
 needs gear**, then **plans and orchestrates the missions** to obtain it — the §5 dispatch loop, now
@@ -156,8 +162,10 @@ rate / camp time vs. skill level / material cost. The item→source DB chain (§
 
 **Open questions / design notes (post-Quartermaster-v1):**
 - Which tradeskill each Lt specializes in (map to the 5 classes / guild needs).
-- Trading mechanics for surplus bot→GL and mats→crafter — prefer in-game give/trade per hard rule #7
-  over direct DB inventory writes.
+- Trading mechanics for surplus bot→GL, deposits to the **guild bank**, and mats→crafter — prefer
+  in-game give/trade/bank-deposit per hard rule #7 over direct DB inventory writes.
+- **Guild-bank access** — confirm the GL's rank can deposit AND withdraw, and that bots/agent can move
+  items to/from it; otherwise pick the GL-mule fallback. Read the guild-bank tables in the DB reader.
 - Skill-up curve + material thresholds; a give-up/retry policy like the farm policy.
 - Design the intent contract + DB reader now so this layer slots in later (don't build it yet).
 
