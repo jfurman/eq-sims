@@ -121,18 +121,41 @@ node brain/emit.js resummon_bots Lt1 bot1 bot2 bot3 bot4 bot5
 ```
 Record the bot-follow result in PROGRESS.md.
 
+## Phase 1: shadow + grouping (laptop)
+
+1. **Fill the roster** in `config.json` (`roster`): your name/class/role, the 5 Lt names/classes/roles,
+   the GL, the `anchor` Lt, and each Lt's bots (name/class/role). Set `shadow.squads` to the client(s)
+   that should follow you. `role` ∈ tank/healer/cc/support/dps. Push so the box gets it.
+2. **Install the watch** on YOUR client (laptop): copy `mqbridge/playerwatch.lua` into that client's
+   MQ `\lua\` folder (`/echo ${MacroQuest.Path[lua]}` to find it), then `/lua run playerwatch`. It
+   writes your zone/loc to `.player/state.tsv`.
+3. **Shadow:** double-click `scripts\shadow.cmd` (or `node brain/shadow.js`). Zone around — your shadow
+   squad teleports in behind you. Set `shadow.sendCoords=true` once you've verified `#goto` coord order.
+4. **Group up:**
+   ```powershell
+   node brain/group.js a            # Mode A: you + the 5 Lt clients (no bots), you become leader
+   node brain/group.js b <Lt>       # Mode B: join that Lt's squad; it drops the bot in your role
+   ```
+
+The executor + bridge on the box must be running (Phase 0 setup); the laptop runs the watch + shadow.
+
 ## Intent vocabulary (current)
 | intent | args | maps to | status |
 |---|---|---|---|
-| `say` | `<target> <text...>` | `/dex <target> /say <text>` | verified path |
-| `goto_zone` | `<squad> <zone> [--resummon b,…] [--delay ms]` | `/dex <squad> /say #zone <zone>` (+ delayed `/say ^spawn`/`^summon`/`^follow`) | needs scoped GM |
-| `resummon_bots` | `<squad> <bot…>` | `/dex <squad> /say ^spawn/^summon/^follow` | tune bot syntax |
-| `assist_player` | `<squad>` | `/dex <squad> /assist …` | default, tune to e3next |
-| `engage` | `<squad> <mob>` | `/dex <squad> /target <mob>` | default, tune to e3next |
-| `group_invite` | `<member>` | member auto-accept | prefer e3next auto-accept |
-| `come_to_player` | `<squad>` | — | Phase 1 (needs shadow hook) |
+Relay below is `<relay>` = `config.json` `relay` (default `/e3bct <peer>`, runs the command locally on the target).
+
+| `say` | `<target> <text...>` | `<relay> /say <text>` | verified live |
+| `goto_zone` | `<squad> <zone> [--resummon b,…] [--delay ms]` | `<relay> /say #zone <zone>` (+ delayed `^spawn`/`^summon`/`^follow`) | verified live |
+| `come_to_player` | `<squad> <zone> [--x --y --z] [--player] [--delay]` | `<relay> /say #zone <zone>` (+ delayed `#goto x y z`) | shadow hook |
+| `resummon_bots` | `<squad> <bot…>` | `<relay> /say ^spawn/^summon/^follow` | fallback, unused |
+| `group_invite` | `<inviter> <member>` | `<relay> /invite <member>` | member auto-accepts (guilded) |
+| `make_leader` | `<leader> <by>` | `<relay> /makeleader <leader>` | Mode A handoff |
+| `drop_bot` | `<squad> <bot>` | `<relay> /say ^depop <bot>` | Mode B; verify despawn syntax |
+| `assist_player` | `<squad> <player>` | `<relay> /assist <player>` | tune to e3next |
+| `engage` | `<squad> <mob>` | `<relay> /target <mob>` | tune to e3next |
 
 The brain only ever emits the left two columns' data; the executor owns the mapping (right column).
+Mode A/B and the shadow loop sequence these primitives — see `brain/group.js` and `brain/shadow.js`.
 
 > **Why `/say` wraps `#`/`^` commands:** EQEmu parses GM (`#`) and bot (`^`) commands from chat-channel
 > packets (the server reads the prefix). MacroQuest's parser only handles `/` slash commands and drops

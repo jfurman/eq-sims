@@ -10,11 +10,13 @@
  * Usage:
  *   node brain/emit.js say <target> <text...>
  *   node brain/emit.js goto_zone <squad> <zoneShortName> [--resummon b1,b2,...] [--delay <ms>]
+ *   node brain/emit.js come_to_player <squad> <zone> [--x <n> --y <n> --z <n>] [--player <name>]
  *   node brain/emit.js resummon_bots <squad> <bot1> <bot2> ...
- *   node brain/emit.js assist_player <squad>
+ *   node brain/emit.js assist_player <squad> <player>
  *   node brain/emit.js engage <squad> <mobName>
- *   node brain/emit.js group_invite <member>
- *   node brain/emit.js come_to_player <squad>
+ *   node brain/emit.js group_invite <inviter> <member>
+ *   node brain/emit.js make_leader <leader> <by>
+ *   node brain/emit.js drop_bot <squad> <bot>
  *
  * Env:
  *   EQ_EXEC_HOST  executor address (default 127.0.0.1; set to the box's LAN IP)
@@ -51,10 +53,18 @@ function buildFromArgv(argv) {
       return contract.build.gotoZone(positional[0], positional[1], opts);
     }
     case 'resummon_bots': return contract.build.resummonBots(rest[0], rest.slice(1));
-    case 'assist_player': return contract.build.assistPlayer(rest[0]);
+    case 'assist_player': return contract.build.assistPlayer(rest[0], rest[1]);
     case 'engage':        return contract.build.engage(rest[0], rest.slice(1).join(' '));
-    case 'group_invite':  return contract.build.groupInvite(rest[0]);
-    case 'come_to_player':return contract.build.comeToPlayer(rest[0]);
+    case 'group_invite':  return contract.build.groupInvite(rest[0], rest[1]);
+    case 'make_leader':   return contract.build.makeLeader(rest[0], rest[1]);
+    case 'drop_bot':      return contract.build.dropBot(rest[0], rest[1]);
+    case 'come_to_player': {
+      const { flags, positional } = splitFlags(rest);
+      const opts = { player: flags.player };
+      for (const k of ['x', 'y', 'z']) if (flags[k] !== undefined) opts[k] = parseFloat(flags[k]);
+      if (flags.delay !== undefined) opts.arriveDelayMs = parseInt(flags.delay, 10);
+      return contract.build.comeToPlayer(positional[0], positional[1], opts);
+    }
     default:
       throw new Error(`unknown intent "${type}". See usage in brain/emit.js`);
   }

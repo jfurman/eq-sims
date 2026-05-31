@@ -9,6 +9,21 @@
   "_relay_comment": "Executor->client relay. {peer}=target name, {cmd}=command to run locally on it. e3next targeted broadcast runs the command locally (so #/^ server commands get parsed); DanNet /dex does not. Adjust if your e3 command differs.",
   "relay": "/e3bct {peer} {cmd}",
 
+  "playerStateFile": "C:/EQ/.player/state.tsv",
+
+  "_shadow_comment": "Phase 1 shadow loop (brain/shadow.js). squads = client(s) that auto-teleport into your zone when you zone. sendCoords = also #goto to your exact loc on arrival.",
+  "shadow": { "squads": [], "sendCoords": false },
+
+  "_roster_comment": "role is one of: tank, healer, cc, support, dps. Mode B drops the bot whose ROLE matches the player's role. anchor = the Lt that issues Mode A invites. bots: [{name,class,role}].",
+  "roster": {
+    "player": { "name": "", "class": "", "role": "" },
+    "guildLeader": "",
+    "anchor": "",
+    "lieutenants": [
+      { "name": "", "class": "", "role": "", "bots": [] }
+    ]
+  },
+
   "executor": {
     "host": "0.0.0.0",
     "port": 8777

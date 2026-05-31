@@ -88,12 +88,38 @@ async function run() {
     check('goto_zone+resummon waited for the post-zone delay', elapsed >= 300, `elapsed=${elapsed}ms`);
   }
 
-  // 3) come_to_player: not yet executable (Phase 1) -> ok:false, no command.
+  // 3) come_to_player (zone only) -> #zone into the player's zone.
   {
-    const intent = buildFromArgv(['come_to_player', 'Lt1']);
+    const intent = buildFromArgv(['come_to_player', 'Lt1', 'nro']);
     const res = await sendIntent(intent, OPTS);
-    check('come_to_player reports not-yet-implemented', res.ok === false && /no command/.test(res.error || ''),
+    check('come_to_player -> /e3bct Lt1 /say #zone nro',
+      res.ok === true && res.results[0].cmd === '/e3bct Lt1 /say #zone nro',
       JSON.stringify(res));
+  }
+
+  // 3b) come_to_player with coords -> #zone then delayed #goto to the player's loc.
+  {
+    const intent = buildFromArgv(['come_to_player', 'Lt1', 'nro', '--x', '100', '--y', '200', '--z', '5', '--player', 'Hero', '--delay', '200']);
+    const res = await sendIntent(intent, OPTS);
+    const cmds = (res.results || []).map((x) => x.cmd);
+    check('come_to_player+coords -> #zone then #goto 100 200 5',
+      res.ok === true && cmds.join(' | ') === '/e3bct Lt1 /say #zone nro | /e3bct Lt1 /say #goto 100 200 5',
+      cmds.join(' | '));
+  }
+
+  // 3c) grouping primitives: group_invite, make_leader, drop_bot.
+  {
+    const inv = await sendIntent(buildFromArgv(['group_invite', 'Oram', 'Hero']), OPTS);
+    check('group_invite -> /e3bct Oram /invite Hero',
+      inv.ok === true && inv.results[0].cmd === '/e3bct Oram /invite Hero', JSON.stringify(inv));
+
+    const ld = await sendIntent(buildFromArgv(['make_leader', 'Hero', 'Oram']), OPTS);
+    check('make_leader -> /e3bct Oram /makeleader Hero',
+      ld.ok === true && ld.results[0].cmd === '/e3bct Oram /makeleader Hero', JSON.stringify(ld));
+
+    const db = await sendIntent(buildFromArgv(['drop_bot', 'Oram', 'Tankbot']), OPTS);
+    check('drop_bot -> /e3bct Oram /say ^depop Tankbot (server cmd via /say)',
+      db.ok === true && db.results[0].cmd === '/e3bct Oram /say ^depop Tankbot', JSON.stringify(db));
   }
 
   // 4) contract enforcement: a stale-version intent must be rejected by the executor.

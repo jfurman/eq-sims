@@ -36,9 +36,11 @@ const relayGameCmd = (peer, gameCmd) => relay(peer, `/say ${gameCmd}`);
 // EQEmu bot commands. Modern builds (akk-stack) use the `^` alias prefix. If your server
 // uses the older `#bot ...` form, change these three and nothing else.
 const BOT = {
-  spawn:  (name) => `^spawn ${name}`,   // spawn one of your persisted bots
-  summon: ()     => '^summon',          // pull your spawned bots to you (gather on arrival)
-  follow: ()     => '^follow on',       // make your bots follow you
+  spawn:   (name) => `^spawn ${name}`,   // spawn one of your persisted bots
+  summon:  ()     => '^summon',          // pull your spawned bots to you (gather on arrival)
+  follow:  ()     => '^follow on',       // make your bots follow you
+  despawn: (name) => `^depop ${name}`,   // remove a bot to free its group slot (Mode B). Verify
+                                         // your build's syntax (^depop vs ^botgroup remove vs #bot).
 };
 
 /** Build the re-summon command sequence for a squad's bots, relayed to run locally. */
@@ -60,6 +62,51 @@ function mapIntent(intent) {
     case 'say':
       // Phase 0b primary test: make a named client /say text. text is the rest of the line.
       return { commands: [relay(intent.target, `/say ${intent.text}`)], verified: true };
+
+    case 'group_invite':
+      // The inviter invites the member; the member auto-accepts via e3next (must be guilded).
+      return {
+        commands: [relay(intent.inviter, `/invite ${intent.member}`)],
+        verified: false,
+        note: 'member must be guilded with the inviter for e3next auto-accept (Phase 0a finding)',
+      };
+
+    case 'make_leader':
+      // `by` (current group leader) promotes `leader` to group leader.
+      return {
+        commands: [relay(intent.by, `/makeleader ${intent.leader}`)],
+        verified: false,
+        note: 'issued by the current leader; used after Mode A assembly to hand you the group',
+      };
+
+    case 'drop_bot':
+      // Despawn a named bot to free a group slot (Mode B: you fill its ROLE). Server command.
+      return {
+        commands: [relayGameCmd(intent.squad, BOT.despawn(intent.bot))],
+        verified: false,
+        note: 'verify despawn syntax in mapping.js BOT.despawn for your server build',
+      };
+
+    case 'come_to_player': {
+      // Teleport the squad into the player's zone (bots follow #zone natively). If coords are
+      // given, follow up after a load delay with #goto to land near the player.
+      const commands = [relayGameCmd(intent.squad, `#zone ${intent.zone}`)];
+      const hasLoc = intent.x !== undefined && intent.y !== undefined && intent.z !== undefined;
+      if (hasLoc) {
+        return {
+          commands,
+          delayed: [relayGameCmd(intent.squad, `#goto ${intent.x} ${intent.y} ${intent.z}`)],
+          delayMs: intent.arriveDelayMs,
+          verified: false,
+          note: 'verify #goto coord order for your build; bots follow the Lt to coords via ^follow',
+        };
+      }
+      return {
+        commands,
+        verified: false,
+        note: 'lands at the zone safe point; pass x/y/z to arrive at the player. bots follow #zone',
+      };
+    }
 
     case 'goto_zone': {
       // Phase 0d: GM teleport. Requires the client's account to have the scoped #zone status.
@@ -93,9 +140,9 @@ function mapIntent(intent) {
     case 'assist_player':
       // Vanilla /assist points the squad at the player's target; e3next then engages.
       return {
-        commands: [relay(intent.squad, `/assist ${intent.player || '${Group.Leader}'}`)],
+        commands: [relay(intent.squad, `/assist ${intent.player}`)],
         verified: false,
-        note: 'default uses vanilla /assist; tune to e3next auto-assist if preferred',
+        note: 'vanilla /assist on the player; tune to e3next auto-assist if preferred',
       };
 
     case 'engage':
@@ -104,23 +151,6 @@ function mapIntent(intent) {
         commands: [relay(intent.squad, `/target ${intent.target}`)],
         verified: false,
         note: 'targets the mob; e3next executes combat locally. Confirm target-by-name works for your mobs',
-      };
-
-    case 'group_invite':
-      // The actual invite is issued by the group leader/player; the member must accept.
-      // Recommended: enable auto-accept in e3next. Default here nudges the member to accept.
-      return {
-        commands: [relay(intent.member, '/notify ConfirmationDialogBox Yes_Button leftmouseup')],
-        verified: false,
-        note: 'leader issues the /invite; this only auto-accepts. Prefer e3next auto-accept-group config',
-      };
-
-    case 'come_to_player':
-      // Needs the player's current zone + loc from the Phase 1 shadow hook; not derivable yet.
-      return {
-        commands: [],
-        verified: false,
-        note: 'Phase 1: requires player zone/loc from the zone-event shadow hook before it can emit a command',
       };
 
     default:

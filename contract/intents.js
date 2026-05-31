@@ -10,30 +10,37 @@
  * Versioned. Change deliberately. Wire format is one JSON object per line ("\n"-delimited).
  */
 
-const CONTRACT_VERSION = '0.2.0';
+const CONTRACT_VERSION = '0.3.0';
 
 /*
  * The intent vocabulary. Each spec declares required (`req`) and optional (`opt`) fields
- * with types. Supported types: 'string', 'number', 'string[]'. Start tiny (Phase 0) and
- * grow; `say` is the easiest first test.
+ * with types. Supported types: 'string', 'number', 'string[]'.
  *
- * goto_zone carries an OPTIONAL re-summon batch: if a teleported squad's bots don't follow
- * the #zone (the design's Phase 0d risk), the brain supplies the bot names and a post-zone
- * delay, and the executor re-spawns/summons them on arrival. The brain decides the timing
- * (resummonDelayMs); the executor just relays it.
+ * Phase 1 adds player-grouping + come-to-me primitives. Grouping is built from small
+ * primitives (group_invite / make_leader / drop_bot) that the BRAIN sequences into Mode A
+ * (you + the 5 Lt clients) and Mode B (you join one Lt's squad, dropping the bot in YOUR
+ * ROLE — role, not class). The executor only knows the primitives.
  */
 const INTENT_SPECS = {
   say:            { req: { target: 'string', text: 'string' } },
-  group_invite:   { req: { member: 'string' } },
-  assist_player:  { req: { squad: 'string' } },
+  // Grouping primitives (member/leader auto-accept via e3next once guilded).
+  group_invite:   { req: { inviter: 'string', member: 'string' } }, // inviter /invite member
+  make_leader:    { req: { leader: 'string', by: 'string' } },      // `by` issues /makeleader leader
+  drop_bot:       { req: { squad: 'string', bot: 'string' } },      // despawn a named bot to free a slot
+  // Combat direction (e3next executes locally).
+  assist_player:  { req: { squad: 'string', player: 'string' } },
+  engage:         { req: { squad: 'string', target: 'string' } },
+  // Travel.
   goto_zone:      { req: { squad: 'string', zone: 'string' },
                     opt: { resummonBots: 'string[]', resummonDelayMs: 'number' } },
-  engage:         { req: { squad: 'string', target: 'string' } },
-  come_to_player: { req: { squad: 'string' } },
+  come_to_player: { req: { squad: 'string', zone: 'string' },
+                    opt: { x: 'number', y: 'number', z: 'number', player: 'string',
+                           arriveDelayMs: 'number' } },
   resummon_bots:  { req: { squad: 'string', bots: 'string[]' } },
 };
 
 const DEFAULT_RESUMMON_DELAY_MS = 15000; // ~zone load + settle before re-spawning bots
+const DEFAULT_ARRIVE_DELAY_MS = 12000;   // ~zone load before teleport-to-player-coords
 
 /** Monotonic-ish id without external deps. Unique per process run. */
 let _seq = 0;
@@ -109,13 +116,13 @@ function parse(line) {
 
 // Convenience builders — what the brain calls.
 const build = {
-  say:          (target, text)  => makeIntent('say', { target, text }),
-  groupInvite:  (member)        => makeIntent('group_invite', { member }),
-  assistPlayer: (squad)         => makeIntent('assist_player', { squad }),
-  engage:       (squad, target) => makeIntent('engage', { squad, target }),
-  comeToPlayer: (squad)         => makeIntent('come_to_player', { squad }),
-  resummonBots: (squad, bots)   => makeIntent('resummon_bots', { squad, bots }),
-  // goto_zone with optional re-summon-on-arrival.
+  say:          (target, text)   => makeIntent('say', { target, text }),
+  groupInvite:  (inviter, member) => makeIntent('group_invite', { inviter, member }),
+  makeLeader:   (leader, by)     => makeIntent('make_leader', { leader, by }),
+  dropBot:      (squad, bot)     => makeIntent('drop_bot', { squad, bot }),
+  assistPlayer: (squad, player)  => makeIntent('assist_player', { squad, player }),
+  engage:       (squad, target)  => makeIntent('engage', { squad, target }),
+  resummonBots: (squad, bots)    => makeIntent('resummon_bots', { squad, bots }),
   gotoZone: (squad, zone, opts = {}) => makeIntent('goto_zone', {
     squad,
     zone,
@@ -124,11 +131,23 @@ const build = {
       ? (opts.resummonDelayMs ?? DEFAULT_RESUMMON_DELAY_MS)
       : undefined,
   }),
+  comeToPlayer: (squad, zone, opts = {}) => makeIntent('come_to_player', {
+    squad,
+    zone,
+    x: opts.x,
+    y: opts.y,
+    z: opts.z,
+    player: opts.player,
+    arriveDelayMs: (opts.x !== undefined && opts.y !== undefined && opts.z !== undefined)
+      ? (opts.arriveDelayMs ?? DEFAULT_ARRIVE_DELAY_MS)
+      : undefined,
+  }),
 };
 
 module.exports = {
   CONTRACT_VERSION,
   DEFAULT_RESUMMON_DELAY_MS,
+  DEFAULT_ARRIVE_DELAY_MS,
   INTENT_SPECS,
   makeIntent,
   validate,

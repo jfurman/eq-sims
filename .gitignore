@@ -1,5 +1,7 @@
 # Runtime bridge files (queue/ack spool shared by executor + mqbridge.lua)
 /.bridge/
+# Runtime player-state file (written by playerwatch.lua, read by brain/shadow.js)
+/.player/
 
 # config.json IS committed (required by the launchers; shared value works on both machines
 # when brain.executorHost = the box's LAN IP). config.example.json stays as a template.

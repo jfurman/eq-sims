@@ -6,6 +6,22 @@
   "_relay_comment": "How the executor relays a command to a named client. {peer}=target name, {cmd}=command to run on it. DanNet's /dex bypasses the client's #/^ chat-command routing (server cmds aren't parsed), so we use e3next's targeted broadcast, which runs the command locally on the peer. Change here if your e3 targeted-broadcast command differs.",
   "relay": "/e3bct {peer} {cmd}",
 
+  "playerStateFile": "C:/EQ/.player/state.tsv",
+
+  "_shadow_comment": "Phase 1 shadow loop (brain/shadow.js). squads = client(s) that auto-teleport into your zone when you zone. sendCoords = also #goto to your exact loc on arrival (verify #goto coord order first).",
+  "shadow": { "squads": ["Oram"], "sendCoords": false },
+
+  "_roster_comment": "FILL THIS IN. role is one of: tank, healer, cc, support, dps. Mode B drops the bot whose ROLE matches the player's role (not class). anchor = the Lt that issues Mode A invites.",
+  "roster": {
+    "player": { "name": "", "class": "", "role": "" },
+    "guildLeader": "",
+    "anchor": "Oram",
+    "lieutenants": [
+      { "name": "Oram",   "class": "", "role": "", "bots": [] },
+      { "name": "Cynric", "class": "", "role": "", "bots": [] }
+    ]
+  },
+
   "executor": {
     "_comment": "How the executor (on the 32 GB box) binds. host 0.0.0.0 = reachable across the LAN.",
     "host": "0.0.0.0",

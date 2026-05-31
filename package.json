@@ -8,6 +8,8 @@
     "test:phase0": "node tools/test-phase0.js",
     "executor": "node executor/executor.js",
     "mockbridge": "node tools/mockbridge.js",
-    "emit": "node brain/emit.js"
+    "emit": "node brain/emit.js",
+    "shadow": "node brain/shadow.js",
+    "group": "node brain/group.js"
   }
 }

@@ -75,6 +75,38 @@ need `/say` AND a local-execution relay (`/e3bct`, not `/dex`); bots follow `#zo
 > Note: bridge `status:OK` = command dispatched via `mq.cmd`, not in-game-effect-confirmed. A `/dex`
 > to an unknown DanNet peer still acks OK. Confirm peer names with `/dnet`.
 
+## Phase 1 — player grouping + shadow (in progress, still no LLM)
+
+### Built (this repo) — software complete, local test green (18 checks)
+- **Contract v0.3.0:** `come_to_player {squad, zone, x?,y?,z?, player?}`, grouping primitives
+  `group_invite {inviter,member}` / `make_leader {leader,by}` / `drop_bot {squad,bot}`, and
+  `assist_player {squad, player}`.
+- **Executor mapping:** come_to_player (`#zone` + optional delayed `#goto` to your loc), the group
+  primitives, and `drop_bot` (despawn via `BOT.despawn`, default `^depop`).
+- **`mqbridge/playerwatch.lua`** — runs in YOUR client's MQ (laptop); read-only; writes your
+  zone/loc/class/name to `.player/state.tsv` each second.
+- **`brain/shadow.js`** — watches that file; on a zone change emits `come_to_player` for the
+  configured `shadow.squads`. `scripts/shadow.cmd` one-click.
+- **`brain/group.js`** — sequences the primitives into Mode A (you + 5 Lt clients; anchor invites,
+  then `/makeleader you`) and Mode B (join a Lt's squad; drops the bot whose ROLE matches yours —
+  role, not class, per the 2026-05-31 correction). Uses `config.json` `roster`.
+
+### Decisions baked in
+- **Mode B drops by ROLE, not class.** Player has a role (tank/healer/cc/support/dps); Mode B drops
+  the squad bot in that role (may be a different class). Brain resolves role->bot from `roster`.
+- **No laptop executor needed.** Your client only runs the read-only `playerwatch.lua`; grouping is
+  driven from the box (anchor Lt invites, your e3next auto-accepts — guilded).
+
+### Not yet verified (needs the live setup)
+- **[ ] Roster** filled in `config.json` (player name/class/role; 5 Lt names/classes/roles; GL;
+  anchor; each Lt's bots name/class/role).
+- **[ ] playerwatch.lua** copied to the PLAYER client's MQ `\lua\` and `/lua run playerwatch`.
+- **[ ] Shadow** — `scripts/shadow.cmd` on the laptop; you zone, the shadow squad follows.
+- **[ ] come_to_player coords** — verify `#goto x y z` order on your build (set `shadow.sendCoords`).
+- **[ ] Mode A / Mode B** — run `node brain/group.js a` / `b <Lt>`; confirm group forms; Mode B drop.
+- **[ ] Relay coverage** — confirm `group_invite`/`assist_player` land in-game (only `say`/`#zone`
+  exercised live so far).
+
 ## Next
 - Close 0a–0d on the live boxes; tick the boxes above with notes (esp. the 0d bot-follow result).
 - Phase 1: `come_to_player` needs the player zone/loc shadow hook before its mapping can emit a

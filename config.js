@@ -27,6 +27,10 @@ module.exports = {
   bridgeDir,
   // Executor->client relay template. {peer}=target name, {cmd}=command run locally on it.
   relay: process.env.EQ_RELAY || f.relay || '/e3bct {peer} {cmd}',
+  // Phase 1: player-state file (written by playerwatch.lua, read by brain/shadow.js).
+  playerStateFile: process.env.EQ_PLAYER_STATE || f.playerStateFile || path.join(__dirname, '.player', 'state.tsv'),
+  shadow: f.shadow || { squads: [], sendCoords: false },
+  roster: f.roster || {},
   executor: {
     host: process.env.EQ_EXEC_HOST || ex.host || '0.0.0.0',
     port: parseInt(process.env.EQ_EXEC_PORT || ex.port || 8777, 10),
