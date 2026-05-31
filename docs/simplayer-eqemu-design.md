@@ -202,7 +202,8 @@ Add Lieutenants to the full balanced five; LLM quartermaster reasoning + guild-c
   - **Must-fix already applied:** server moved off the laptop (server + LLM + main client would have
     overcommitted 16 GB).
 - **The five Lieutenant classes:** which balanced five, and how Mode A handles player-class duplication.
-- **Bots follow teleport vs. re-summon on arrival** — verify in Phase 0.
+- **Bots follow teleport vs. re-summon on arrival** — DECIDED (Phase 0d, 2026-05-31): bots zone with
+  their owner natively on `#zone`. Re-summon is implemented as a fallback but not needed by default.
 - **Gear scoring source:** hand-authored weights vs. derived from item data.
 - **Farm give-up policy:** timeout/fallback for low-drop targets.
 
@@ -211,7 +212,8 @@ Add Lieutenants to the full balanced five; LLM quartermaster reasoning + guild-c
 ## 11. Risk notes
 - **6 simultaneous clients** is the real resource constraint — bots are cheap, clients are not.
 - **Teleport privilege** — scope the account status to only the movement command(s), not full GM.
-- **Bot-follows-teleport** is the one mechanic to verify early; have re-summon as the fallback.
+- **Bot-follows-teleport** — VERIFIED working (Phase 0d): bots follow `#zone` natively. Re-summon
+  fallback kept but unused.
 - **Gear scoring is a heuristic** — good-enough beats perfect.
 - **One guild-brain agent, not N** — coherence + LLM cost.
 - **Private use only** — LAN server; MacroQuest is local tooling; you hold the clients.
