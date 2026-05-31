@@ -39,6 +39,32 @@ add `/lua run bridge` to however your clients already autoload e3next.
 - `scripts/` — one-click launchers: `start-box.cmd`, `console.cmd`, `test.cmd`.
 - `tools/` — `mockbridge.js` (game-free bridge stand-in) + `test-phase0.js` (end-to-end test).
 
+## Syncing the two machines (git)
+
+Repo: `https://github.com/jfurman/eq-sims`. The laptop is where code is edited; the box pulls.
+`config.json` is **gitignored** (machine-specific) — each machine keeps its own, copied from
+`config.example.json`.
+
+**One-time on the box** (if it already has the files from a manual copy, adopt them in place):
+```powershell
+cd C:\EQ
+git init -b main
+git remote add origin https://jfurman@github.com/jfurman/eq-sims.git
+git fetch origin
+git reset --hard origin/main          # tracked files -> repo versions; config.json & .bridge/ untouched
+if (-not (Test-Path config.json)) { Copy-Item config.example.json config.json }
+```
+(Or a fresh `git clone https://jfurman@github.com/jfurman/eq-sims.git` into an empty folder.)
+
+**Every update afterward** (laptop -> push, box -> pull):
+```powershell
+# laptop: git add -A; git commit -m "..."; git push
+# box:
+cd C:\EQ
+git pull
+# then restart the executor if executor/ or contract/ changed
+```
+
 ## Verify the software locally (no game, run on either machine)
 ```
 node tools/test-phase0.js      # expect: ALL PASS
