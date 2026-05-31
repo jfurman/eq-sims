@@ -6,6 +6,14 @@
 # config.json IS committed (required by the launchers; shared value works on both machines
 # when brain.executorHost = the box's LAN IP). config.example.json stays as a template.
 
+# E3Next/MacroQuest distribution (binaries + vendor config) — large third-party, NOT tracked.
+# Policy: the stock install stays out of git; the assets WE author/update are tracked in their own
+# repo folders and deployed into the install:
+#   - our MQ Lua  -> /mqbridge/*.lua   (tracked)   deploy with scripts/deploy-lua.ps1
+#   - our e3 INIs -> /e3/*             (tracked, when we create them)
+# To force-track a specific vendor file we customize: `git add -f <path>`.
+/tools/E3Next/
+
 # Node
 node_modules/
 npm-debug.log*

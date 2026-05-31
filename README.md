@@ -36,8 +36,11 @@ add `/lua run bridge` to however your clients already autoload e3next.
 - `brain/emit.js` — Phase 0 intent emitter (no LLM yet).
 - `executor/` — `executor.js` (LAN listener), `mapping.js` (intent→command table), `bridge.js`.
 - `mqbridge/bridge.lua` — runs inside MacroQuest; executes commands in-game.
-- `scripts/` — one-click launchers: `start-box.cmd`, `console.cmd`, `test.cmd`.
-- `tools/` — `mockbridge.js` (game-free bridge stand-in) + `test-phase0.js` (end-to-end test).
+- `scripts/` — one-click launchers: `start-box.cmd`, `console.cmd`, `shadow.cmd`, `test.cmd`,
+  `deploy-lua.ps1` (push our Lua into a client's MQ `\lua\`).
+- `tools/` — `mockbridge.js` + `test-phase0.js`; `tools/E3Next/` is the stock MacroQuest+E3Next
+  install (**gitignored**, local only). Policy: vendor install stays out of git; assets **we** author
+  are tracked (`/mqbridge/*.lua`, and `/e3/*` for any e3 INIs we create) and deployed into the install.
 
 ## Syncing the two machines (git)
 
@@ -126,9 +129,10 @@ Record the bot-follow result in PROGRESS.md.
 1. **Fill the roster** in `config.json` (`roster`): your name/class/role, the 5 Lt names/classes/roles,
    the GL, the `anchor` Lt, and each Lt's bots (name/class/role). Set `shadow.squads` to the client(s)
    that should follow you. `role` ∈ tank/healer/cc/support/dps. Push so the box gets it.
-2. **Install the watch** on YOUR client (laptop): copy `mqbridge/playerwatch.lua` into that client's
-   MQ `\lua\` folder (`/echo ${MacroQuest.Path[lua]}` to find it), then `/lua run playerwatch`. It
-   writes your zone/loc to `.player/state.tsv`.
+2. **Install the watch** on YOUR client (laptop): deploy our Lua into that client's MQ `\lua\` folder
+   — `powershell -File scripts\deploy-lua.ps1 -LuaDir "<MQ lua dir>"` (find it with
+   `/echo ${MacroQuest.Path[lua]}`), or copy `mqbridge/playerwatch.lua` by hand. Then `/lua run
+   playerwatch`. It writes your zone/loc to `.player/state.tsv`.
 3. **Shadow:** double-click `scripts\shadow.cmd` (or `node brain/shadow.js`). Zone around — your shadow
    squad teleports in behind you. Set `shadow.sendCoords=true` once you've verified `#goto` coord order.
 4. **Group up:**
