@@ -52,8 +52,10 @@ Short, append-only log of what's proven and what's next. See `CLAUDE.md` (build 
   **Prerequisite found:** e3next only auto-accepts group invites from someone in its bot
   network/guild/raid. The player must share a GUILD with the Lieutenants (design §8) before any
   grouping works — this is a hard Phase 1 prerequisite, not optional flavor.
-- **[ ] 0d. Teleport-follow** — `goto_zone` issues `#zone`; verify the 5 bots follow. If not, use
-  `--resummon` (now wired) and confirm the squad relocates intact.
+- **[~] 0d. Teleport-follow** — teleport WORKS in-game (2026-05-31): `node brain/emit.js goto_zone
+  Oram guildlobby` relocated Oram end-to-end (brain -> executor -> bridge -> `/e3bct` -> local
+  `/say #zone`). Remaining: confirm the 5 bots follow the `#zone`; if not, test `--resummon` and
+  confirm the squad relocates intact. THEN 0d is fully closed.
   - **Fix 1 (2026-05-30):** server commands (`#zone`, `^…`) must be wrapped in `/say` — MQ drops a
     bare `#`/`^`; the client routes `#`/`^` to the command path only from the chat/`/say` path.
   - **Fix 2 (2026-05-31):** the relay matters. DanNet `/dex <peer> /say #zone` executes on the peer
