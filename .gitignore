@@ -14,7 +14,17 @@
 # synced — each machine keeps its own copy of the install; only config/ travels over git.
 # Our MQ Lua source of truth stays in /mqbridge/*.lua (deploy into the install with deploy-lua.ps1).
 /tools/E3Next/*
+# Track ONLY the e3 config subtrees — NOT the whole MQ config folder. The config root holds login
+# CREDENTIALS (MQ2AutoLogin.ini, login.db*) and per-machine UI/plugin state that must never be committed.
 !/tools/E3Next/config/
+/tools/E3Next/config/*
+!/tools/E3Next/config/e3 Bot Inis/
+!/tools/E3Next/config/e3 Macro Inis/
+# ...and drop runtime/churny bits within those (rewritten every session / machine-specific):
+/tools/E3Next/config/**/*_UI.ini
+/tools/E3Next/config/**/*.db
+/tools/E3Next/config/**/*.reg
+/tools/E3Next/config/**/SharedData/
 
 # Node
 node_modules/
