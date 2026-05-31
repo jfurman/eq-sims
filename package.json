@@ -1,0 +1,13 @@
+{
+  "name": "eq-guild-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-orchestrated EQEmu guild agent: brain (laptop) -> intents over LAN -> executor (box) -> MacroQuest bridge. Phase 0.",
+  "type": "commonjs",
+  "scripts": {
+    "test:phase0": "node tools/test-phase0.js",
+    "executor": "node executor/executor.js",
+    "mockbridge": "node tools/mockbridge.js",
+    "emit": "node brain/emit.js"
+  }
+}

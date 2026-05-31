@@ -1,0 +1,18 @@
+# Runtime bridge files (queue/ack spool shared by executor + mqbridge.lua)
+/.bridge/
+
+# Machine-specific config — each machine keeps its own (laptop points at the box's IP;
+# the box binds 0.0.0.0). Copy config.example.json -> config.json on each machine.
+/config.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Logs / scratch
+*.log
+
+# OS cruft
+Thumbs.db
+Desktop.ini
+.DS_Store

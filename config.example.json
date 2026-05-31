@@ -1,0 +1,18 @@
+{
+  "_comment": "Template. Copy to config.json on EACH machine and set its values. config.json is gitignored because the laptop and the box need different settings. Env vars (EQ_BRIDGE_DIR, EQ_EXEC_HOST, EQ_EXEC_PORT) still override.",
+
+  "_box_setup": "On the 32 GB box (runs the executor + bridge): bridgeDir must match BRIDGE_DIR in mqbridge/bridge.lua; executor.host = 0.0.0.0 so the LAN can reach it.",
+  "_laptop_setup": "On the laptop (runs the brain): brain.executorHost = the BOX's LAN IP (e.g. 192.168.1.204). bridgeDir is unused here.",
+
+  "bridgeDir": "C:/EQ/.bridge",
+
+  "executor": {
+    "host": "0.0.0.0",
+    "port": 8777
+  },
+
+  "brain": {
+    "executorHost": "127.0.0.1",
+    "executorPort": 8777
+  }
+}
