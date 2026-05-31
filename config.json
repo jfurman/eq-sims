@@ -1,0 +1,17 @@
+{
+  "_comment": "Committed + shared by both machines. Required by scripts/start-box and scripts/console. brain.executorHost = the box's LAN IP works from the laptop AND the box (the box reaches its own IP; executor binds 0.0.0.0). bridgeDir MUST match BRIDGE_DIR in mqbridge/bridge.lua. Env vars (EQ_*) still override per-machine if ever needed.",
+
+  "bridgeDir": "C:/EQ/.bridge",
+
+  "executor": {
+    "_comment": "How the executor (on the 32 GB box) binds. host 0.0.0.0 = reachable across the LAN.",
+    "host": "0.0.0.0",
+    "port": 8777
+  },
+
+  "brain": {
+    "_comment": "Where the brain (laptop) sends intents. Set executorHost to the BOX's LAN IP for cross-LAN; 127.0.0.1 if testing on one machine.",
+    "executorHost": "192.168.1.204",
+    "executorPort": 8777
+  }
+}
