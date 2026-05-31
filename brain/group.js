@@ -90,23 +90,60 @@ async function modeA(flags) {
   return runSequence(intents);
 }
 
-/** Mode B: you join one Lt's squad; that Lt drops the bot in your role. */
+/**
+ * Choose which bot a Lt drops to make room for the player in Mode B.
+ * Rule: a Cleric (essentialClasses) must always remain in the group, so it is never dropped —
+ * UNLESS the player IS that class (then the player replaces it). When the player's role-match would
+ * be an essential (e.g. a Shaman/Druid healer whose only role-match is the Cleric), keep the
+ * essential and drop the most-redundant non-essential bot by dropPriority.
+ * Pure function (no I/O) so it's unit-testable.
+ * @returns {{ bot: object|null, reason: string }}
+ */
+function pickDropBot(lt, player, opts = {}) {
+  const bots = lt.bots || [];
+  const essential = (opts.essentialClasses || ['Cleric']).map((s) => String(s).toLowerCase());
+  const order = (opts.dropPriority || ['dps', 'support', 'cc', 'healer', 'tank']).map((s) => String(s).toLowerCase());
+  const pClass = String(player.class || '').toLowerCase();
+  const pRole = String(player.role || '').toLowerCase();
+  const isEssential = (b) => essential.includes(String(b.class || '').toLowerCase());
+
+  // Player is an essential class (e.g. a Cleric) -> they replace that same-class bot.
+  if (essential.includes(pClass)) {
+    const same = bots.find((b) => String(b.class || '').toLowerCase() === pClass);
+    if (same) return { bot: same, reason: `player is ${player.class}; replaces the same-class bot` };
+  }
+  // Prefer a NON-essential bot in the player's role (fill the role, keep essentials).
+  const roleMatch = bots.find((b) => !isEssential(b) && String(b.role || '').toLowerCase() === pRole);
+  if (roleMatch) return { bot: roleMatch, reason: `non-essential ${roleMatch.role} bot matches your role` };
+  // Role-match is essential (kept) -> drop the most-redundant non-essential by priority.
+  for (const role of order) {
+    const b = bots.find((x) => !isEssential(x) && String(x.role || '').toLowerCase() === role);
+    if (b) return { bot: b, reason: `keeping essential (${essential.join('/')}); dropping redundant ${role}` };
+  }
+  const any = bots.find((b) => !isEssential(b));
+  if (any) return { bot: any, reason: 'fallback: first non-essential bot' };
+  return { bot: null, reason: 'no droppable (non-essential) bot found' };
+}
+
+/** Mode B: you join one Lt's squad; that Lt drops a bot (keeping a Cleric) so you fill a slot. */
 async function modeB(ltName, flags) {
   requireRoster();
   const lt = roster.lieutenants.find((l) => l.name && l.name.toLowerCase() === String(ltName).toLowerCase());
   if (!lt) throw new Error(`no lieutenant "${ltName}" in roster.lieutenants`);
   const player = roster.player.name;
-  const playerRole = roster.player.role;
 
   if (!flags['no-move']) await coLocate([lt.name], playerZone(flags));
 
-  const dropBot = (lt.bots || []).find((b) => b.role && b.role.toLowerCase() === playerRole.toLowerCase());
+  const { bot: dropBot, reason } = pickDropBot(lt, roster.player, {
+    essentialClasses: roster.essentialClasses,
+    dropPriority: roster.dropPriority,
+  });
   const intents = [];
   if (dropBot) {
-    log(`Mode B: ${lt.name} drops ${dropBot.name} (role ${dropBot.role}) so ${player} (${playerRole}) fills it, then invites ${player}`);
+    log(`Mode B: ${lt.name} drops ${dropBot.name} (${dropBot.class}/${dropBot.role}) [${reason}], then invites ${player}`);
     intents.push(contract.build.dropBot(lt.name, dropBot.name));
   } else {
-    log(`Mode B: no bot with role "${playerRole}" on ${lt.name} (bots: ${(lt.bots || []).map((b) => `${b.name}:${b.role}`).join(', ') || 'none configured'}). Inviting without a drop — group may hit the 6-cap.`);
+    log(`Mode B: ${reason} on ${lt.name} (bots: ${(lt.bots || []).map((b) => `${b.name}:${b.class}/${b.role}`).join(', ') || 'none configured'}). Inviting without a drop — group may hit the 6-cap.`);
   }
   intents.push(contract.build.groupInvite(lt.name, player));
   return runSequence(intents);
@@ -142,4 +179,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { modeA, modeB };
+module.exports = { modeA, modeB, pickDropBot };

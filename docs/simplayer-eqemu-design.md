@@ -40,7 +40,12 @@ mobile squad anchors; bots are cheap bodies that follow their owner. **Cost scal
 - **Mode A — all-client group:** Player + the 5 Lieutenant clients = a full group of six, **zero bots
   in the group.** Feels like grouping with five real people. The premium mode.
 - **Mode B — Lieutenant squad + player:** player joins one Lieutenant's own group (Lt + 5 bots); the
-  Lt **drops the bot matching the player's class** so the player fills that role with no redundancy.
+  Lt **drops the bot matching the player's ROLE** (role, not class) so the player fills that role with
+  no redundancy. **Essential exception — always keep a Cleric:** the Cleric is never dropped unless the
+  player *is* a Cleric. If the player is a non-Cleric healer (Shaman/Druid), the Cleric stays and the
+  Lt drops the most-redundant non-essential bot instead (per a configured `dropPriority`). Configured
+  via `roster.essentialClasses` (default `[Cleric]`) + `roster.dropPriority`; logic in `brain/group.js`
+  `pickDropBot` (unit-tested).
 - **Mode C — raid:** all clients converge; GL spawns filler bots to a 72-body, 12-group raid.
 
 ---

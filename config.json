@@ -11,11 +11,13 @@
   "_shadow_comment": "Phase 1 shadow loop (brain/shadow.js). squads = client(s) that auto-teleport into your zone when you zone. sendCoords = also #goto to your exact loc on arrival (verify #goto coord order first).",
   "shadow": { "squads": ["Oram"], "sendCoords": false },
 
-  "_roster_comment": "FILL THIS IN. role is one of: tank, healer, cc, support, dps. Mode B drops the bot whose ROLE matches the player's role (not class). anchor = the Lt that issues Mode A invites.",
+  "_roster_comment": "FILL THIS IN. role is one of: tank, healer, cc, support, dps. Mode B drops the bot whose ROLE matches the player's role (not class). anchor = the Lt that issues Mode A invites. essentialClasses are never dropped (a Cleric must always remain) UNLESS the player is that class; when the role-match would drop an essential, we keep it and drop a redundant bot by dropPriority order.",
   "roster": {
     "player": { "name": "", "class": "", "role": "" },
     "guildLeader": "",
     "anchor": "Oram",
+    "essentialClasses": ["Cleric"],
+    "dropPriority": ["dps", "support", "cc", "healer", "tank"],
     "lieutenants": [
       { "name": "Oram",   "class": "", "role": "", "bots": [] },
       { "name": "Cynric", "class": "", "role": "", "bots": [] }

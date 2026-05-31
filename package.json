@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "test:phase0": "node tools/test-phase0.js",
+    "test:modeb": "node tools/test-modeb.js",
     "executor": "node executor/executor.js",
     "mockbridge": "node tools/mockbridge.js",
     "emit": "node brain/emit.js",
