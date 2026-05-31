@@ -96,6 +96,12 @@ need `/say` AND a local-execution relay (`/e3bct`, not `/dex`); bots follow `#zo
   the squad bot in that role (may be a different class). Brain resolves role->bot from `roster`.
 - **No laptop executor needed.** Your client only runs the read-only `playerwatch.lua`; grouping is
   driven from the box (anchor Lt invites, your e3next auto-accepts — guilded).
+- **Invites are SAME-ZONE only (2026-05-31).** e3next auto-accepts an invite only when inviter and
+  invitee share a zone; cross-zone it rejects ("not in my network/guild/raid") even when guilded. So
+  `group.js` now **co-locates first**: come_to_player each member into the player's zone, wait for
+  zone-load (`COLOCATE_DELAY_MS`), THEN invite. `--no-move` skips it; `--zone` overrides the source.
+  Also: a relog can leave a Lt's guild roster stale (e3next caches it) — relog to refresh, or add the
+  player to e3next's trusted-inviter config.
 
 ### Not yet verified (needs the live setup)
 - **[ ] Roster** filled in `config.json` (player name/class/role; 5 Lt names/classes/roles; GL;
