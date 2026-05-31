@@ -41,14 +41,14 @@ function check(name, cond, detail) {
 async function run() {
   console.log('Phase 0 end-to-end pipeline test (no game)\n');
 
-  // 1) say: the canonical Phase 0b command. Must produce /dex <peer> /say <text>.
+  // 1) say: the canonical Phase 0b command. Must produce <relay> <peer> /say <text>.
   {
     const intent = buildFromArgv(['say', 'Lt1', 'hail', 'and', 'well', 'met']);
     const res = await sendIntent(intent, OPTS);
     check('say returns ok', res.ok === true, JSON.stringify(res));
     check('say verified', res.verified === true);
-    check('say -> /dex Lt1 /say hail and well met',
-      res.results && res.results[0] && res.results[0].cmd === '/dex Lt1 /say hail and well met',
+    check('say -> /e3bct Lt1 /say hail and well met',
+      res.results && res.results[0] && res.results[0].cmd === '/e3bct Lt1 /say hail and well met',
       res.results && res.results[0] && res.results[0].cmd);
     check('say acked OK', res.results && res.results[0] && res.results[0].status === 'OK');
   }
@@ -58,8 +58,8 @@ async function run() {
     const intent = buildFromArgv(['goto_zone', 'Lt1', 'nro']);
     const res = await sendIntent(intent, OPTS);
     check('goto_zone returns ok', res.ok === true, JSON.stringify(res));
-    check('goto_zone -> /dex Lt1 /say #zone nro (server cmd via chat)',
-      res.results && res.results[0] && res.results[0].cmd === '/dex Lt1 /say #zone nro',
+    check('goto_zone -> /e3bct Lt1 /say #zone nro (server cmd via chat)',
+      res.results && res.results[0] && res.results[0].cmd === '/e3bct Lt1 /say #zone nro',
       res.results && res.results[0] && res.results[0].cmd);
   }
 
@@ -70,7 +70,7 @@ async function run() {
     const cmds = (res.results || []).map((x) => x.cmd);
     check('resummon_bots returns ok', res.ok === true, JSON.stringify(res));
     check('resummon_bots spawns each bot + summon + follow (via /say)',
-      cmds.join(' | ') === '/dex Lt1 /say ^spawn botA | /dex Lt1 /say ^spawn botB | /dex Lt1 /say ^summon | /dex Lt1 /say ^follow on',
+      cmds.join(' | ') === '/e3bct Lt1 /say ^spawn botA | /e3bct Lt1 /say ^spawn botB | /e3bct Lt1 /say ^summon | /e3bct Lt1 /say ^follow on',
       cmds.join(' | '));
   }
 
@@ -83,7 +83,7 @@ async function run() {
     const cmds = (res.results || []).map((x) => x.cmd);
     check('goto_zone+resummon returns ok', res.ok === true, JSON.stringify(res));
     check('goto_zone+resummon issues #zone then spawns then summon/follow (via /say)',
-      cmds.join(' | ') === '/dex Lt1 /say #zone nro | /dex Lt1 /say ^spawn botA | /dex Lt1 /say ^spawn botB | /dex Lt1 /say ^summon | /dex Lt1 /say ^follow on',
+      cmds.join(' | ') === '/e3bct Lt1 /say #zone nro | /e3bct Lt1 /say ^spawn botA | /e3bct Lt1 /say ^spawn botB | /e3bct Lt1 /say ^summon | /e3bct Lt1 /say ^follow on',
       cmds.join(' | '));
     check('goto_zone+resummon waited for the post-zone delay', elapsed >= 300, `elapsed=${elapsed}ms`);
   }

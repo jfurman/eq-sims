@@ -25,6 +25,8 @@ const bridgeDir = process.env.EQ_BRIDGE_DIR || f.bridgeDir || path.join(__dirnam
 
 module.exports = {
   bridgeDir,
+  // Executor->client relay template. {peer}=target name, {cmd}=command run locally on it.
+  relay: process.env.EQ_RELAY || f.relay || '/e3bct {peer} {cmd}',
   executor: {
     host: process.env.EQ_EXEC_HOST || ex.host || '0.0.0.0',
     port: parseInt(process.env.EQ_EXEC_PORT || ex.port || 8777, 10),

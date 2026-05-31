@@ -54,9 +54,14 @@ Short, append-only log of what's proven and what's next. See `CLAUDE.md` (build 
   grouping works — this is a hard Phase 1 prerequisite, not optional flavor.
 - **[ ] 0d. Teleport-follow** — `goto_zone` issues `#zone`; verify the 5 bots follow. If not, use
   `--resummon` (now wired) and confirm the squad relocates intact.
-  - **Fix applied 2026-05-30:** server commands (`#zone`, `^spawn/^summon/^follow`) must be issued via
-    `/say` — MQ drops a bare `#`/`^`, but EQEmu parses them from the chat packet. Mapping now wraps
-    them (`dexGameCmd` in `executor/mapping.js`). Local test updated + green. Awaiting in-game retest.
+  - **Fix 1 (2026-05-30):** server commands (`#zone`, `^…`) must be wrapped in `/say` — MQ drops a
+    bare `#`/`^`; the client routes `#`/`^` to the command path only from the chat/`/say` path.
+  - **Fix 2 (2026-05-31):** the relay matters. DanNet `/dex <peer> /say #zone` executes on the peer
+    through a path that does NOT trigger `#`/`^` routing -> literal say. But `/docommand /say #zone`
+    run LOCALLY teleports. So we relay via e3next's targeted broadcast (`/e3bct {peer} {cmd}`), which
+    runs the command locally on the target. Relay is now **config-driven** (`relay` in config.json) so
+    it's swappable without code. Local test green. **Anchor (bridge host) must run e3next** to issue
+    `/e3bct`. Awaiting in-game retest of `goto_zone`.
   - Prereq cleared: scoped `#zone` account status granted (works when typed in chat).
 
 > Note: bridge `status:OK` = command dispatched via `mq.cmd`, not in-game-effect-confirmed. A `/dex`

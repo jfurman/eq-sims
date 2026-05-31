@@ -6,6 +6,9 @@
 
   "bridgeDir": "C:/EQ/.bridge",
 
+  "_relay_comment": "Executor->client relay. {peer}=target name, {cmd}=command to run locally on it. e3next targeted broadcast runs the command locally (so #/^ server commands get parsed); DanNet /dex does not. Adjust if your e3 command differs.",
+  "relay": "/e3bct {peer} {cmd}",
+
   "executor": {
     "host": "0.0.0.0",
     "port": 8777
